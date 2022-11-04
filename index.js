@@ -51,11 +51,20 @@ async function run() {
 
         /* create API to get all orders data */
         app.get('/orders', async (req, res) => {
-            const query = {}
+            let query = {}
+            /* find specific user's order with email */
+            if (req.query.email) {
+                query = {
+                    email: req.query.email
+                }
+            }
             const cursor = orderCollection.find(query)
             const orders = await cursor.toArray()
             res.send(orders)
         })
+
+        /* create API to get specific order data */
+
         /* create data from client side info */
         app.post('/orders', async (req, res) => {
             const order = req.body;
