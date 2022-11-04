@@ -49,7 +49,14 @@ async function run() {
         /* API for all orders */
         const orderCollection = client.db('cool-car').collection('orders');
 
-        /* create API to get all orders data */
+        /* (CREATE)create data from client side info */
+        app.post('/orders', async (req, res) => {
+            const order = req.body;
+            const result = await orderCollection.insertOne(order);
+            res.send(result);
+        })
+
+        /* (READ)create API to get all orders data */
         app.get('/orders', async (req, res) => {
             let query = {}
             /* find specific user's order with email */
@@ -63,14 +70,15 @@ async function run() {
             res.send(orders)
         })
 
-        /* create API to get specific order data */
-
-        /* create data from client side info */
-        app.post('/orders', async (req, res) => {
-            const order = req.body;
-            const result = await orderCollection.insertOne(order);
-            res.send(result);
+        /* (DELETE) create API to delete a specific data from server and DB */
+        app.delete('/orders/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const result = await orderCollection.deleteOne(query)
+            res.send(result)
         })
+
+
     }
     finally {
 
