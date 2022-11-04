@@ -26,7 +26,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 async function run() {
     try {
-        /* API for all services */
+        /* create a DB in mongoDB for all services */
         const serviceCollection = client.db('cool-car').collection('services');
 
         /* to show DB's data to UI */
@@ -46,10 +46,10 @@ async function run() {
             res.send(service)
         })
 
-        /* API for all orders */
+        /* create a DB in mongoDB for all orders */
         const orderCollection = client.db('cool-car').collection('orders');
 
-        /* (CREATE)create data from client side info */
+        /* (CREATE)create single single data from client side info */
         app.post('/orders', async (req, res) => {
             const order = req.body;
             const result = await orderCollection.insertOne(order);
