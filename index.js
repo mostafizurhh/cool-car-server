@@ -49,6 +49,13 @@ async function run() {
         /* API for all orders */
         const orderCollection = client.db('cool-car').collection('orders');
 
+        /* create API to get all orders data */
+        app.get('/orders', async (req, res) => {
+            const query = {}
+            const cursor = orderCollection.find(query)
+            const orders = await cursor.toArray()
+            res.send(orders)
+        })
         /* create data from client side info */
         app.post('/orders', async (req, res) => {
             const order = req.body;
