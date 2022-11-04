@@ -70,6 +70,20 @@ async function run() {
             res.send(orders)
         })
 
+        /* (UPDATE) create API to partially update a specific data from server and DB */
+        app.patch('/orders/:id', async (req, res) => {
+            const id = req.params.id;
+            const status = req.body.status;
+            const query = { _id: ObjectId(id) }
+            const updatedDoc = {
+                $set: {
+                    status: status
+                }
+            }
+            const result = await orderCollection.updateOne(query, updatedDoc);
+            res.send(result)
+        })
+
         /* (DELETE) create API to delete a specific data from server and DB */
         app.delete('/orders/:id', async (req, res) => {
             const id = req.params.id;
@@ -77,8 +91,6 @@ async function run() {
             const result = await orderCollection.deleteOne(query)
             res.send(result)
         })
-
-
     }
     finally {
 
