@@ -20,10 +20,26 @@ app.listen(port, () => {
 /*--------------------
   mongoDB connection 
   -------------------*/
-/* hide credential */
+/* hide DB credential */
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.mniec4l.mongodb.net/?retryWrites=true&w=majority`;
 console.log(uri);
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+
+/* verify and decode JWT token from client */
+function verifyJWT(req, res, next) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        res.status(401).send({ message: 'Unauthorized Access' })
+    }
+    const token = authHeader.split(' ')[1];
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
+        if (err) {
+            res.status(401).send({ message: 'Unauthorized Access' })
+        }
+        req.decoded = decoded;
+        next()
+    });
+}
 
 async function run() {
     try {
@@ -58,7 +74,8 @@ async function run() {
         })
 
         /* (READ)create API to get all orders data */
-        app.get('/orders', async (req, res) => {
+        app.get('/orders', verifyJWT, async (req, res) => {
+
             let query = {}
             /* find specific user's order with email */
             if (req.query.email) {
