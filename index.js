@@ -1,5 +1,6 @@
 const express = require('express')
 const cors = require('cors')
+const jwt = require('jsonwebtoken')
 const app = express()
 const port = process.env.PORT || 5000
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
@@ -36,7 +37,7 @@ async function run() {
             const cursor = serviceCollection.find(query)
             const services = await cursor.toArray()
             res.send(services)
-        })
+        });
 
         /* API to get a specific service/data */
         app.get('/services/:id', async (req, res) => {
@@ -44,7 +45,7 @@ async function run() {
             const query = { _id: ObjectId(id) };
             const service = await serviceCollection.findOne(query);
             res.send(service)
-        })
+        });
 
         /* create a DB in mongoDB for all orders */
         const orderCollection = client.db('cool-car').collection('orders');
@@ -68,7 +69,7 @@ async function run() {
             const cursor = orderCollection.find(query)
             const orders = await cursor.toArray()
             res.send(orders)
-        })
+        });
 
         /* (UPDATE) create API to partially update a specific data from server and DB */
         app.patch('/orders/:id', async (req, res) => {
@@ -82,7 +83,7 @@ async function run() {
             }
             const result = await orderCollection.updateOne(query, updatedDoc);
             res.send(result)
-        })
+        });
 
         /* (DELETE) create API to delete a specific data from server and DB */
         app.delete('/orders/:id', async (req, res) => {
@@ -90,6 +91,13 @@ async function run() {
             const query = { _id: ObjectId(id) }
             const result = await orderCollection.deleteOne(query)
             res.send(result)
+        });
+
+        /* create JWT token API */
+        app.post('/jwt', (req, res) => {
+            const user = req.body;
+            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
+            res.send(token)
         })
     }
     finally {
