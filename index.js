@@ -28,7 +28,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 /* verify and decode JWT token from client */
 function verifyJWT(req, res, next) {
     const authHeader = req.headers.authorization;
-    // console.log(authHeader)
+    console.log(authHeader)
     if (!authHeader) {
         return res.status(401).send({ message: 'Unauthorized Access' })
     }
@@ -64,16 +64,6 @@ async function run() {
             res.send(service)
         });
 
-        /* create a DB in mongoDB for all orders */
-        const orderCollection = client.db('cool-car').collection('orders');
-
-        /* (CREATE)create single single data from client side info */
-        app.post('/orders', async (req, res) => {
-            const order = req.body;
-            const result = await orderCollection.insertOne(order);
-            res.send(result);
-        })
-
         /* create JWT token API */
         app.post('/jwt', (req, res) => {
             const user = req.body;
@@ -81,11 +71,21 @@ async function run() {
             res.send({ token })
         })
 
+        /* create a DB in mongoDB for all orders */
+        const orderCollection = client.db('cool-car').collection('orders');
+
+        /* (CREATE)create single single data from client side info */
+        app.post('/orders', verifyJWT, async (req, res) => {
+            const order = req.body;
+            const result = await orderCollection.insertOne(order);
+            res.send(result);
+        })
+
         /* (READ)create API to get all orders data */
         app.get('/orders', verifyJWT, async (req, res) => {
             /* verify user with jwt token */
             const decoded = req.decoded;
-            // console.log(decoded)
+            console.log(decoded)
             if (decoded.email !== req.query.email) {
                 return res.status(403).send({ message: 'Forbidden User' })
             }
@@ -102,7 +102,7 @@ async function run() {
         });
 
         /* (UPDATE) create API to partially update a specific data from server and DB */
-        app.patch('/orders/:id', async (req, res) => {
+        app.patch('/orders/:id', verifyJWT, async (req, res) => {
             const id = req.params.id;
             const status = req.body.status;
             const query = { _id: ObjectId(id) }
@@ -116,7 +116,7 @@ async function run() {
         });
 
         /* (DELETE) create API to delete a specific data from server and DB */
-        app.delete('/orders/:id', async (req, res) => {
+        app.delete('/orders/:id', verifyJWT, async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) }
             const result = await orderCollection.deleteOne(query)
